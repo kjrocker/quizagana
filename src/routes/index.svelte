@@ -10,7 +10,7 @@
 	let current = list[0];
 	let value = '';
 	$: {
-		if (value === current[1]) {
+		if (value.toLowerCase() === current[1]) {
 			setTimeout(() => {
 				guessStore.update((v) => [...v, current]);
 				value = '';
@@ -24,7 +24,7 @@
 	<span class="text-[10rem]">{current[0]}</span><span class="text-2xl">{$guessStore.length}</span>
 	<span class="">
 		<label>
-			Guess
+			What's this?
 			<input
 				type="text"
 				name="guess"

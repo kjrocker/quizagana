@@ -1,37 +1,78 @@
 <script lang="ts">
-	import Spinner from '../lib/components/base/spinner.svelte';
 	import { hiraganaStore } from '../lib/data/api';
 	import { guessStore } from '../lib/data/stores';
-	import { makeArraySampler } from '../lib/util/array-sampler';
+	import { makeArraySampler, sample } from '../lib/util/array-sampler';
+
+	const getType = (): 'ROMA' | 'GANA' => 'GANA' || sample(['ROMA', 'GANA']);
 
 	let list = makeArraySampler($hiraganaStore.base);
 	let current = list.next();
+	let currentType = getType();
+	let currentOptions: [string, string][];
 	let value = '';
+
 	$: {
-		if (value.toLowerCase() === current[1]) {
+		if (value === '') {
+			currentOptions = list.including(current);
+		}
+	}
+
+	$: {
+		console.log({ value });
+	}
+
+	$: {
+		if (currentType === 'GANA' && value.toLowerCase() === current[1]) {
 			setTimeout(() => {
 				guessStore.update((v) => [...v, current]);
 				value = '';
 				current = list.next();
+				currentType = getType();
+			}, 100);
+		} else if (currentType === 'ROMA' && value === current[1]) {
+			setTimeout(() => {
+				guessStore.update((v) => [...v, current]);
+				value = '';
+				current = list.next();
+				currentType = getType();
 			}, 100);
 		}
 	}
 </script>
 
 <div class="flex flex-col items-center">
-	<span class="text-[10rem]">{current[0]}</span>
+	<span class="text-[10rem]">{currentType === 'GANA' ? current[0] : current[1].toUpperCase()}</span>
 	<div class="">
 		<div class="flex justify-between">
 			<label for="guess" class="mr-4"> What's this?</label>
 			<span>{$guessStore.length} so far</span>
 		</div>
-		<input
-			type="text"
-			name="guess"
-			id="guess"
-			class="shadow-sm dark:text-slate-900 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-			bind:value
-		/>
+		{#if currentType === 'GANA'}
+			<input
+				type="text"
+				name="guess"
+				id="guess"
+				class="shadow-sm dark:text-slate-900 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+				bind:value
+			/>
+		{:else}
+			<div class="flex flex-row justify-between">
+				{#each currentOptions as option}
+					<label
+						class="relative m-1 float-left border-2 border-blue-600 border-solid box-border flex-grow transition-colors ease-in-out hover:border-green-500"
+					>
+						<input
+							type="radio"
+							class="peer w-full h-full top-0 left-0 opacity-0 cursor-pointer absolute"
+							name="guess"
+							bind:group={value}
+							value={option[1]}
+						/>
+						<div class="inner p-4 text-4xl peer-checked:bg-zinc-500">{option[0]}</div>
+					</label>
+				{/each}
+			</div>
+		{/if}
 	</div>
 </div>
 

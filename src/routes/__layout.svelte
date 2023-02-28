@@ -1,8 +1,8 @@
 <script lang="ts">
 	import '../app.css';
-	import { hiraganaStore } from '../lib/data/api';
+	import { dataStore, hiraganaStore } from '../lib/data/api';
 
-	const preloadPromises: Promise<unknown>[] = [hiraganaStore.init()];
+	const preloadPromises: Promise<unknown>[] = [hiraganaStore.init(), dataStore.init()];
 
 	const preload = Promise.all(preloadPromises);
 </script>
